@@ -1,0 +1,35 @@
+version: "3.8"
+
+services:
+  frontend:
+    depends_on: 
+      - backend
+    build: ./frontend
+    volumes:
+      - ./frontend:/app  # Mount local frontend code to /app in the container
+      - /app/node_modules  # Ensure node_modules are not overwritten by the volume mount
+    ports:
+      - "4000:3000"
+    environment:
+      - CHOKIDAR_USEPOLLING=true  # Enable polling for file watching
+      - CI=true  # Disable interactive mode, useful for React in Docker
+
+  backend:
+    build: ./backend
+    volumes:
+      - ./backend:/app  # Mount local backend code to /app in the container
+      - /app/node_modules  # Ensure node_modules are not overwritten by the volume mount
+    ports:
+      - "3001:3001"
+    environment: 
+      DB_URL: mongodb://db/vidly
+
+  db:
+    image: mongo:4.0-xenial
+    ports:
+      - 27017:27017
+    volumes:
+      - vidly:/data/db
+
+volumes:
+  vidly:
